@@ -1,5 +1,8 @@
-package com.demo.batch;
+package com.demo.batch.config;
 
+import com.demo.batch.JobCompletionNotificationListener;
+import com.demo.batch.model.Person;
+import com.demo.batch.PersonItemProcessor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;

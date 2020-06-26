@@ -1,4 +1,4 @@
-package com.demo.batch;
+package com.demo.batch.model;
 
 public class Person {
 
