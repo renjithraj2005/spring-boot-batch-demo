@@ -65,6 +65,7 @@ public class BatchConfiguration {
     @Bean
     public Job importUserJob(JobCompletionNotificationListener listener, Step step1) {
         return jobBuilderFactory.get("importUserJob")
+                .preventRestart() //set the restartable field to false
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(step1)
