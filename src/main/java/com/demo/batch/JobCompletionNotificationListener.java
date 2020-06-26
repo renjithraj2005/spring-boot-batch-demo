@@ -24,6 +24,12 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
     }
 
     @Override
+    public void beforeJob(JobExecution jobExecution) {
+        log.info("!!! JOB Is going to start! " + jobExecution.getStatus());
+        super.beforeJob(jobExecution);
+    }
+
+    @Override
     public void afterJob(JobExecution jobExecution) {
         if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("!!! JOB FINISHED! Time to verify the results");
@@ -34,6 +40,8 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
                             rs.getString(1),
                             rs.getString(2))
             ).forEach(person -> log.info("Found <" + person + "> in the database."));
+        }else if (jobExecution.getStatus() == BatchStatus.FAILED) {
+            log.info("!!! JOB Failed!");
         }
     }
 }
