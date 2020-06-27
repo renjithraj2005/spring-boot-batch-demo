@@ -3,6 +3,7 @@ package com.demo.batch.config;
 import com.demo.batch.JobCompletionNotificationListener;
 import com.demo.batch.model.Person;
 import com.demo.batch.PersonItemProcessor;
+import com.demo.batch.task.DemoTask;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -68,8 +69,8 @@ public class BatchConfiguration {
                 .preventRestart() //set the restartable field to false
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(step1)
-                .end()
+                .start(step1)
+                .next(step2())
                 .build();
     }
 
@@ -80,6 +81,13 @@ public class BatchConfiguration {
                 .reader(reader())
                 .processor(processor())
                 .writer(writer)
+                .build();
+    }
+
+    @Bean
+    public Step step2(){
+        return stepBuilderFactory.get("step2")
+                .tasklet(new DemoTask())
                 .build();
     }
 
