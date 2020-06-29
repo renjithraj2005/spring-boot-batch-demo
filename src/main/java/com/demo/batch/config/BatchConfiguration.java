@@ -1,8 +1,10 @@
 package com.demo.batch.config;
 
+import com.demo.batch.BatchWriter;
 import com.demo.batch.JobCompletionNotificationListener;
 import com.demo.batch.model.Person;
 import com.demo.batch.PersonItemProcessor;
+import com.demo.batch.repository.PersonRepository;
 import com.demo.batch.task.DemoTask;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,6 +14,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -21,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
@@ -32,6 +36,9 @@ public class BatchConfiguration {
 
     @Autowired
     public StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    public BatchWriter writer;
 
     // tag::readerwriterprocessor[]
     @Bean
@@ -52,15 +59,7 @@ public class BatchConfiguration {
         return new PersonItemProcessor();
     }
 
-    @Bean
-    public JdbcBatchItemWriter<Person> writer(DataSource dataSource) {
-        return new JdbcBatchItemWriterBuilder<Person>()
-                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO people (first_name, last_name) VALUES (:firstName, :lastName)")
-                .dataSource(dataSource)
-                .build();
-    }
-    // end::readerwriterprocessor[]
+    // end::readerprocessor[]
 
     // tag::jobstep[]
     @Bean
@@ -75,7 +74,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Step step1(JdbcBatchItemWriter<Person> writer) {
+    public Step step1() {
         return stepBuilderFactory.get("step1")
                 .<Person, Person> chunk(10)
                 .reader(reader())

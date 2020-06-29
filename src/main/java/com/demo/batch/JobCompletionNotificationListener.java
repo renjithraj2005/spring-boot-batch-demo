@@ -1,6 +1,7 @@
 package com.demo.batch;
 
 import com.demo.batch.model.Person;
+import com.demo.batch.repository.PersonRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -16,16 +17,17 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 
     private static final Logger log = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final PersonRepository personRepository;
 
     @Autowired
-    public JobCompletionNotificationListener(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public JobCompletionNotificationListener(PersonRepository personRepository) {
+        this.personRepository = personRepository;
     }
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
         log.info("!!! JOB Is going to start! " + jobExecution.getStatus());
+        log.info("Db count before execution := "+ personRepository.count());
         super.beforeJob(jobExecution);
     }
 
@@ -35,11 +37,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
             log.info("!!! JOB FINISHED! Time to verify the results");
             log.info("Start Time : "+jobExecution.getStartTime());
 
-            jdbcTemplate.query("SELECT first_name, last_name FROM people",
-                    (rs, row) -> new Person(
-                            rs.getString(1),
-                            rs.getString(2))
-            ).forEach(person -> log.info("Found <" + person + "> in the database."));
+            log.info("Db count after execution := "+ personRepository.count());
         }else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.info("!!! JOB Failed!");
         }
